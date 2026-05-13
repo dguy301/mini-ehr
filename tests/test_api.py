@@ -263,67 +263,124 @@ def test_list_audit_events_can_filter_by_action():
     assert len(events) == 1
     assert events[0]["action"] == "VIEW_PATIENT"
 
-    def test_list_audit_events_can_filter_by_actor():
-        patient = {
-            "patient_id": "P001",
-            "first_name": "John",
-            "last_name": "Doe",
-            "date_of_birth": "1970-05-12",
-            "visits": [],
-        }
-        client.post("/patients", json=patient)
-        client.get("/patients/P001")
+def test_list_audit_events_can_filter_by_actor():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
+    client.post("/patients", json=patient)
+    client.get("/patients/P001")
 
-        response = client.get("/audit/events?actor=api_user")
+    response = client.get("/audit/events?actor=api_user")
 
-        assert response.status_code == 200
+    assert response.status_code == 200
 
-        events = response.json()
-        assert len(events) >= 1
-        assert all(event["actor"] == "api_user" for event in events)
+    events = response.json()
+    assert len(events) >= 1
+    assert all(event["actor"] == "api_user" for event in events)
 
-    def test_actor_header_is_recorded_in_audit_event():
-        patient = {
-            "patient_id": "P001",
-            "first_name": "John",
-            "last_name": "Doe",
-            "date_of_birth": "1970-05-12",
-            "visits": [],
-        }
+def test_actor_header_is_recorded_in_audit_event():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
 
-        client.post(
-            "/patients",
-            json=patient,
-            headers={"X-Actor": "analyst_001"},
-        )
+    client.post(
+        "/patients",
+        json=patient,
+        headers={"X-Actor": "analyst_001"},
+    )
 
-        response = client.get("/audit/events?actor=analyst_001")
+    response = client.get("/audit/events?actor=analyst_001")
 
-        assert response.status_code == 200
-        assert len(response.json()) == 1
-        assert response.json()[0]["actor"] == "analyst_001"
-    
-    def test_audit_summary_endpoint():
-        patient = {
-            "patient_id": "P001",
-            "first_name": "John",
-            "last_name": "Doe",
-            "date_of_birth": "1970-05-12",
-            "visits": [],
-        }
-        client.post(
-            "/patients",
-            json=patient,
-            headers={"X-Actor": "analyst_001"},
-        )
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["actor"] == "analyst_001"
 
-        response = client.get("/audit/summary")
+def test_audit_summary_endpoint():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
+    client.post(
+        "/patients",
+        json=patient,
+        headers={"X-Actor": "admin_001"},
+    )
 
-        assert response.status_code == 200
+    client.get(
+        "/patients/P001",
+        headers={"X-Actor": "analyst_001"},
+    )
 
-        summary = response.json()
-        assert summary["total_events"] == 2
-        assert summary["counts_by_action"]["CREATE_PATIENT"] == 1
-        assert summary["counts_by_action"]["VIEW_PATIENT"] == 1
-        assert summary["counts_by_actor"]["admin_001"] == 1
-        assert summary["counts_by_actor"]["analyst_001"] == 1
+    response = client.get("/audit/summary")
+
+    assert response.status_code == 200
+
+    summary = response.json()
+    assert summary["total_events"] == 2
+    assert summary["counts_by_action"]["CREATE_PATIENT"] == 1
+    assert summary["counts_by_action"]["VIEW_PATIENT"] == 1
+    assert summary["counts_by_actor"]["admin_001"] == 1
+    assert summary["counts_by_actor"]["analyst_001"] == 1
+
+def test_get_patient_fhir_endpoint():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
+
+    client.post("/patients", json=patient)
+
+    response = client.get("/patients/P001/fhir")
+
+    assert response.status_code == 200
+
+    resource = response.json()
+
+    assert resource["resourceType"] == "Patient"
+    assert resource["id"] == "P001"
+    assert resource["name"][0]["given"] == ["John"]
+    assert resource["name"][0]["family"] == "Doe"
+
+def test_get_patient_fhir_encounters_endpoint():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
+    client.post("/patients", json=patient)
+
+    visit = {
+        "visit_id": "V001",
+        "date": "2026-05-04",
+        "type": "ER",
+        "diagnosis": "Hypertension",
+        "treatment": "Medication review",
+        "provider": "Dr. Smith",
+    }
+    client.post("/patients/P001/visits", json=visit)
+
+    response = client.get("/patients/P001/fhir/encounters")
+
+    assert response.status_code == 200
+
+    resources = response.json()
+    assert len(resources) == 1
+    assert resources[0]["resourceType"] == "Encounter"
+    assert resources[0]["id"] == "V001"
+    assert resources[0]["subject"]["reference"] == "Patient/P001"

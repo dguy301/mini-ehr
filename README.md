@@ -463,3 +463,45 @@ The internal `Patient` model can be converted into a structure containing:
 - `birthDate`
 
 This begins aligning the project with healthcare interoperability concepts.
+
+## FHIR-Like API Endpoint
+
+The API exposes a simplified FHIR-like patient resource:
+
+```text
+```
+GET /patients/{patient_id}/fhir
+
+## FHIR-Like Encounter Resource
+
+The internal `Visit` model can now be converted into a simplified FHIR-like `Encounter` resource.
+
+This maps project visits to healthcare interoperability concepts.
+
+A visit becomes an encounter with:
+
+- `resourceType`
+- `id`
+- `status`
+- `class`
+- `subject`
+- `period`
+
+## FHIR-Like Encounter API
+
+The API exposes simplified FHIR-like encounters through:
+
+```text
+```
+GET /patients/{patient_id}/fhir/encounters
+
+## FHIR-Like Condition Resource
+
+Visit diagnoses can now be converted into simplified FHIR-like `Condition` resources.
+
+Each condition references:
+
+- the patient
+- the related encounter
+
+This demonstrates how healthcare resources are linked together in interoperability systems.

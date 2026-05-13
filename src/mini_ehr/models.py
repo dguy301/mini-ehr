@@ -8,6 +8,48 @@ class Visit(BaseModel):
     treatment: str | None = None
     provider: str | None = None
 
+    def to_fhir_like_encounter(self, patient_id: str) -> dict:
+        """
+        Convert this visit into a simplified FHIR-like Encounter resource.
+        """
+        return {
+            "resourceType": "Encounter",
+            "id": self.visit_id,
+            "status": "finished",
+            "class": {
+                "display": self.type,
+            },
+            "subject": {
+                "reference": f"Patient/{patient_id}",
+            },
+            "period": {
+                "start": self.date,
+            },
+        }
+    
+    def to_fhir_like_condition(self, patient_id: str) -> dict | None:
+        """
+        Convert the visit diagnosis into a simplified FHIR-like Condition resource.
+        
+        Returns None if no diagnosis exists.
+        """
+        if not self.diagnosis:
+            return None
+        
+        return {
+            "resourceType": "Condition",
+            "id": f"condition-{self.visit_id}",
+            "subject": {
+                "reference": f"Patient/{patient_id}",
+            },
+            "code": {
+                "text": self.diagnosis,
+            },
+            "encounter": {
+                "reference": f"Encounter/{self.visit_id}",
+            },
+        }
+
 class Patient(BaseModel):
     patient_id: str
     first_name: str
