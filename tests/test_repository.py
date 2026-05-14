@@ -151,3 +151,33 @@ def test_visit_without_diagnosis_returns_no_condition():
     resource = visit.to_fhir_like_condition(patient_id="P001")
 
     assert resource is None
+
+def test_visit_can_convert_to_fhir_like_procedure():
+    visit = Visit(
+        visit_id="V001",
+        date="2026-05-04",
+        type="ER",
+        diagnosis="Hypertension",
+        treatment="Medication review",
+        provider="Dr. Smith",
+    )
+
+    resource = visit.to_fhir_like_procedure(patient_id="P001")
+
+    assert resource["resourceType"] == "Procedure"
+    assert resource["id"] == "procedure-V001"
+    assert resource["status"] == "completed"
+    assert resource["subject"]["reference"] == "Patient/P001"
+    assert resource["encounter"]["reference"] == "Encounter/V001"
+    assert resource["code"]["text"] == "Medication review"
+
+def test_visit_without_treatment_returns_no_procedure():
+    visit = Visit(
+        visit_id="V001",
+        date="2026-05-04",
+        type="ER"
+    )
+
+    resource = visit.to_fhir_like_procedure(patient_id="P001")
+
+    assert resource is None

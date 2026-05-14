@@ -49,6 +49,30 @@ class Visit(BaseModel):
                 "reference": f"Encounter/{self.visit_id}",
             },
         }
+    
+    def to_fhir_like_procedure(self, patient_id: str) -> dict | None:
+        """
+        Convert the visit treatment into a simplified FHIR-like Procedure resource.
+        
+        Returns None if no treatment exists.
+        """
+        if not self.treatment:
+            return None
+        
+        return {
+            "resourceType": "Procedure",
+            "id": f"procedure-{self.visit_id}",
+            "status": "completed",
+            "subject": {
+                "reference": f"Patient/{patient_id}",
+            },
+            "encounter": {
+                "reference": f"Encounter/{self.visit_id}",
+            },
+            "code": {
+                "text": self.treatment,
+            },
+        }
 
 class Patient(BaseModel):
     patient_id: str

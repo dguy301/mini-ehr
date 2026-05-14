@@ -384,3 +384,72 @@ def test_get_patient_fhir_encounters_endpoint():
     assert resources[0]["resourceType"] == "Encounter"
     assert resources[0]["id"] == "V001"
     assert resources[0]["subject"]["reference"] == "Patient/P001"
+
+def test_get_patient_fhir_conditions_endpoint():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
+    client.post("/patients", json=patient)
+
+    visit = {
+        "visit_id": "V001",
+        "date": "2026-05-04",
+        "type": "ER",
+        "diagnosis": "Hypertension",
+        "treatment": "Medication review",
+        "provider": "Dr. Smith",
+    }
+    client.post("/patients/P001/visits", json=visit)
+
+    response = client.get("/patients/P001/fhir/conditions")
+
+    assert response.status_code == 200
+
+    resources = response.json()
+    assert len(resources) == 1
+    assert resources[0]["resourceType"] == "Condition"
+    assert resources[0]["code"]["text"] == "Hypertension"
+    assert resources[0]["subject"]["reference"] == "Patient/P001"
+    assert resources[0]["encounter"]["reference"] == "Encounter/V001"
+
+def test_get_patient_fhir_bundle_endpoint():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
+    client.post("/patients", json=patient)
+
+    visit = {
+        "visit_id": "V001",
+        "date": "2026-05-04",
+        "type": "ER",
+        "diagnosis": "Hypertension",
+        "treatment": "Medication review",
+        "provider": "Dr. Smith",
+    }
+    client.post("/patients/P001/visits", json=visit)
+
+    response = client.get("/patients/P001/fhir/bundle")
+
+    assert response.status_code == 200
+
+    bundle = response.json()
+    assert bundle["resourceType"] == "Bundle"
+    assert bundle["type"] == "collection"
+
+    resource_types = [
+        entry["resource"]["resourceType"]
+        for entry in bundle["entry"]
+    ]
+
+    assert "Patient" in resource_types
+    assert "Encounter" in resource_types
+    assert "Condition" in resource_types
+    assert "Procedure" in resource_types

@@ -505,3 +505,38 @@ Each condition references:
 - the related encounter
 
 This demonstrates how healthcare resources are linked together in interoperability systems.
+
+## FHIR-Like Condition API
+
+The API exposes simplified FHIR-like condition resources through:
+
+```text
+```
+GET /patients/{patient_id}/fhir/conditions
+
+## FHIR-Like Procedure Resource
+
+Visit treatments can now be converted into simplified FHIR-like `Procedure` resources.
+
+Each procedure references:
+
+- the patient
+- the related encounter
+
+This demonstrates another common FHIR-style relationship between clinical actions and patient encounters.
+
+## FHIR-Like Bundle API
+
+The API exposes a simplified FHIR-like bundle through:
+
+```text
+```
+GET /patients/{patient_id}/fhir/bundle
+
+## FHIR Bundle Module
+
+FHIR bundle construction logic has been moved into a dedicated module:
+
+```text
+```
+src/mini_ehr/fhir.py

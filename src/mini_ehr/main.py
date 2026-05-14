@@ -12,6 +12,7 @@ from mini_ehr.dashboard import build_dashboard_summary
 from mini_ehr.models import Patient, Visit
 from mini_ehr.repository import PatientRepository
 from mini_ehr.config import get_patient_data_path
+from mini_ehr.fhir import build_patient_fhir_bundle
 
 app = FastAPI(title="Mini EHR Workflow System")
 
@@ -144,7 +145,7 @@ def get_patient_fhir_encounters(patient_id: str):
         raise HTTPException(status_code=404, detail="Patient not found")
     
     patient = Patient(**patient_data)
-    
+
     record_audit_event(
         action="VIEW_PATIENT_FHIR_ENCOUNTERS",
         resource_type="patient",
@@ -155,6 +156,49 @@ def get_patient_fhir_encounters(patient_id: str):
         visit.to_fhir_like_encounter(patient_id=patient_id)
         for visit in patient.visits
     ]
+
+@app.get("/patients/{patient_id}/fhir/conditions")
+def get_patient_fhir_conditions(patient_id: str):
+    patient_data = repo.get_patient(patient_id)
+
+    if not patient_data:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    patient = Patient(**patient_data)
+
+    record_audit_event(
+        action="VIEW_PATIENT_FHIR_CONDITIONS",
+        resource_type="patient",
+        resource_id=patient_id,
+    )
+
+    conditions = [
+        visit.to_fhir_like_condition(patient_id=patient_id)
+        for visit in patient.visits
+    ]
+
+    return [
+        condition
+        for condition in conditions
+        if condition is not None
+    ]
+
+@app.get("/patients/{patient_id}/fhir/bundle")
+def get_patient_fhir_bundle(patient_id: str):
+    patient_data = repo.get_patient(patient_id)
+
+    if not patient_data:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    patient = Patient(**patient_data)
+
+    record_audit_event(
+        action="VIEW_PATIENT_FHIR_BUNDLE",
+        resource_type="patient",
+        resource_id=patient_id,
+    )
+
+    return build_patient_fhir_bundle(patient)
 
 @app.get("/dashboard/summary")
 def get_dashboard_summary():
