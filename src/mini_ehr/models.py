@@ -11,6 +11,7 @@ class Visit(BaseModel):
     temperature_f: float | None = None
     systolic_bp: int | None = None
     diastolic_bp: int | None = None
+    medications: list[str] = Field(default_factory=list)
 
     def to_fhir_like_encounter(self, patient_id: str) -> dict:
         """
@@ -139,6 +140,28 @@ class Visit(BaseModel):
             })
 
         return observations
+    
+    def to_fhir_like_medication_statements(self, patient_id: str) -> list[dict]:
+        """
+        Convert visit medications into simplified FHIR-like MedicationStatement resources.
+        """
+        return [
+            {
+                "resourceType": "MedicationStatement",
+                "id": f"medication-{self.visit_id}-{index + 1}",
+                "status": "active",
+                "subject": {
+                    "reference": f"Patient/{patient_id}",
+                },
+                "context": {
+                    "reference": f"Encounter/{self.visit_id}",
+                },
+                "medicationCodeableConcept": {
+                    "text": medication,
+                },
+            }
+            for index, medication in enumerate(self.medications)
+        ]
 
 class Patient(BaseModel):
     patient_id: str

@@ -214,3 +214,20 @@ def test_visit_can_convert_to_fhir_like_observation():
     assert "Heart rate" in codes
     assert "Body temperature" in codes
     assert "Blood pressure" in codes
+
+def test_visit_can_convert_to_fhir_like_medication_statements():
+    visit = Visit(
+        visit_id="V001",
+        date="2026-05-04",
+        type="Primary Care",
+        medications=["Lisinopril", "Metformin"],
+    )
+
+    resources = visit.to_fhir_like_medication_statements(patient_id="P001")
+
+    assert len(resources) == 2
+    assert resources[0]["resourceType"] == "MedicationStatement"
+    assert resources[0]["subject"]["reference"] == "Patient/P001"
+    assert resources[0]["context"]["reference"] == "Encounter/V001"
+    assert resources[0]["medicationCodeableConcept"]["text"] == "Lisinopril"
+    assert resources[1]["medicationCodeableConcept"]["text"] == "Metformin"
