@@ -1,4 +1,8 @@
-from mini_ehr.alerts import generate_alerts, generate_vital_sign_alerts
+from mini_ehr.alerts import (
+    generate_alerts, 
+    generate_vital_sign_alerts,
+    generate_medication_alerts,
+)
 
 def test_patient_with_no_visits_gets_alert():
     patient = {
@@ -117,5 +121,23 @@ def test_high_blood_pressure_alert():
 
     assert any(
         alert["type"] == "HIGH_BLOOD_PRESSURE"
+        for alert in alerts
+    )
+
+def test_duplicate_medication_alert():
+    patient = {
+        "patient_id": "V001",
+        "visits": [
+            {
+                "visit_id": "V001",
+                "medications": ["Lisinopril", "Lisinopril"]
+            }
+        ],
+    }
+
+    alerts = generate_medication_alerts(patient)
+
+    assert any(
+        alert["type"] == "DUPLICATE_MEDICATION"
         for alert in alerts
     )

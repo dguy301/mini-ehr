@@ -43,6 +43,7 @@ def generate_alerts(patient: dict) -> list[dict]:
         })
 
     alerts.extend(generate_vital_sign_alerts(patient))
+    alerts.extend(generate_medication_alerts(patient))
     
     return alerts
 
@@ -79,4 +80,31 @@ def generate_vital_sign_alerts(patient: dict) -> list[dict]:
                 "message": f"Systolic blood pressure {systolic} is elevated.",
             })
 
+    return alerts
+
+def generate_medication_alerts(patient: dict) -> list[dict]:
+    """
+    Generate alerts for medication-related issues.
+    """
+    alerts = []
+
+    for visit in patient.get("visits", []):
+        visit_id = visit.get("visit_id")
+        medications = visit.get("medications", [])
+        normalized = [med.lower() for med in medications]
+
+        duplicates = {
+            med
+            for med in normalized
+            if normalized.count(med) > 1
+        }
+
+        for duplicate in duplicates:
+            alerts.append({
+                "type": "DUPLICATE_MEDICATION",
+                "visit_id": visit_id,
+                "medication": duplicate,
+                "message": f"Medication {duplicate} appears more than once.",
+            })
+        
     return alerts

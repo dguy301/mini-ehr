@@ -603,3 +603,13 @@ The API exposes simplified FHIR-like medication resources through:
 ```text
 ```
 GET /patients/{patient_id}/fhir/medications
+
+## Medication Alerts
+
+The project now includes a simple medication safety alert.
+
+Current medication rule:
+
+- duplicate medication listed within the same visit
+
+This demonstrates basic medication data-quality checking.
