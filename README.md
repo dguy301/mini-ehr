@@ -613,3 +613,16 @@ Current medication rule:
 - duplicate medication listed within the same visit
 
 This demonstrates basic medication data-quality checking.
+
+## Medication Summary
+
+The project can summarize patient medications.
+
+Current medication summary includes:
+
+- patient ID
+- total medication entries
+- unique medication count
+- counts by medication name
+
+Medication names are normalized to lowercase for counting.
