@@ -15,6 +15,10 @@ def test_build_patient_fhir_bundle():
                 diagnosis="Hypertension",
                 treatment="Medication review",
                 provider="Dr. Smith",
+                heart_rate=88,
+                temperature_f=98.6,
+                systolic_bp=130,
+                diastolic_bp=84,
             )
         ],
     )
@@ -30,5 +34,6 @@ def test_build_patient_fhir_bundle():
 
     assert "Patient" in resource_types
     assert "Encounter" in resource_types
+    assert "Observation" in resource_types
     assert "Condition" in resource_types
     assert "Procedure" in resource_types

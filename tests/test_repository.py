@@ -181,3 +181,36 @@ def test_visit_without_treatment_returns_no_procedure():
     resource = visit.to_fhir_like_procedure(patient_id="P001")
 
     assert resource is None
+
+def test_visit_can_convert_to_fhir_like_observation():
+    visit = Visit(
+        visit_id="V001",
+        date="2026-05-04",
+        type="ER",
+        diagnosis="Hypertension",
+        treatment="Medication review",
+        provider="Dr. Smith",
+        heart_rate=88,
+        temperature_f=98.6,
+        systolic_bp=130,
+        diastolic_bp=84
+    )
+
+    resources = visit.to_fhir_like_observations(patient_id="P001")
+
+    resource_types = [
+        resource["resourceType"]
+        for resource in resources
+    ]
+
+    assert len(resources) == 3
+    assert all(resource_type == "Observation" for resource_type in resource_types)
+
+    codes = [
+        resource["code"]["text"]
+        for resource in resources
+    ]
+
+    assert "Heart rate" in codes
+    assert "Body temperature" in codes
+    assert "Blood pressure" in codes

@@ -441,6 +441,7 @@ def test_get_patient_fhir_bundle_endpoint():
     assert response.status_code == 200
 
     bundle = response.json()
+    
     assert bundle["resourceType"] == "Bundle"
     assert bundle["type"] == "collection"
 
@@ -453,3 +454,43 @@ def test_get_patient_fhir_bundle_endpoint():
     assert "Encounter" in resource_types
     assert "Condition" in resource_types
     assert "Procedure" in resource_types
+
+def test_get_patient_fhir_observations_endpoint():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
+    client.post("/patients", json=patient)
+
+    visit = {
+        "visit_id": "V001",
+        "date": "2026-05-04",
+        "type": "ER",
+        "diagnosis": "Hypertension",
+        "treatment": "Medication review",
+        "provider": "Dr. Smith",
+        "heart_rate": 88,
+        "temperature_f": 98.6,
+        "systolic_bp": 130,
+        "diastolic_bp": 84,
+    }
+    client.post("/patients/P001/visits", json=visit)
+
+    response = client.get("/patients/P001/fhir/observations")
+
+    assert response.status_code == 200
+
+    resources = response.json()
+    assert len(resources) == 3
+
+    codes = [
+        resource["code"]["text"]
+        for resource in resources
+    ]
+
+    assert "Heart rate" in codes
+    assert "Body temperature" in codes
+    assert "Blood pressure" in codes

@@ -11,6 +11,13 @@ def build_patient_fhir_bundle(patient: Patient) -> dict:
         for visit in patient.visits
     ])
 
+    for visit in patient.visits:
+        resources.extend(
+            visit.to_fhir_like_observations(
+                patient_id=patient.patient_id
+            )
+        )
+
     resources.extend([
         condition
         for visit in patient.visits

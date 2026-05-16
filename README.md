@@ -540,3 +540,33 @@ FHIR bundle construction logic has been moved into a dedicated module:
 ```text
 ```
 src/mini_ehr/fhir.py
+
+## FHIR-Like Observation Resource
+
+The project now supports simplified FHIR-like `Observation` resources.
+
+Current observation behavior:
+
+- each visit produces a basic observation
+- the observation records the visit type
+- the observation references the patient
+- the observation references the related encounter
+
+The API exposes observations through:
+
+```text
+```
+GET /patients/{patient_id}/fhir/observations
+
+## Vital Sign Observations
+
+Visits can now include optional vital signs:
+
+- heart rate
+- temperature
+- systolic blood pressure
+- diastolic blood pressure
+
+These values are converted into simplified FHIR-like Observation resources.
+
+This makes the project more realistic because FHIR Observations are commonly used for vitals and clinical measurements.
