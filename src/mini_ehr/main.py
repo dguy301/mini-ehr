@@ -224,6 +224,32 @@ def get_patient_fhir_observations(patient_id: str):
     
     return observations
 
+@app.get("/patients/{patient_id}/fhir/medications")
+def get_patient_fhir_medications(patient_id: str):
+    patient_data = repo.get_patient(patient_id)
+
+    if not patient_data:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    patient = Patient(**patient_data)
+
+    record_audit_event(
+        action="VIEW_PATIENT_FHIR_MEDICATIONS",
+        resource_type="patient",
+        resource_id=patient_id,
+    )
+
+    medications = []
+
+    for visit in patient.visits:
+        medications.extend(
+            visit.to_fhir_like_medication_statements(
+                patient_id=patient_id
+            )
+        )
+
+    return medications
+
 @app.get("/dashboard/summary")
 def get_dashboard_summary():
     patients = repo.list_patients()

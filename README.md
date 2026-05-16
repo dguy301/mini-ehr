@@ -595,3 +595,11 @@ Each medication statement references:
 - the related encounter
 
 Medication statements are also included in the FHIR-like patient bundle.
+
+## FHIR-Like Medication API
+
+The API exposes simplified FHIR-like medication resources through:
+
+```text
+```
+GET /patients/{patient_id}/fhir/medications
