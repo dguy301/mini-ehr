@@ -41,5 +41,42 @@ def generate_alerts(patient: dict) -> list[dict]:
             "type": "FREQUENT_ER_VISITS",
             "message": "Patient has more than 2 ER visits recorded.",
         })
+
+    alerts.extend(generate_vital_sign_alerts(patient))
     
+    return alerts
+
+def generate_vital_sign_alerts(patient: dict) -> list[dict]:
+    """
+    Generate alerts for abnormal vital signs.
+    """
+    alerts = []
+
+    for visit in patient.get("visits", []):
+        visit_id = visit.get("visit_id")
+
+        heart_rate = visit.get("heart_rate")
+        if heart_rate is not None and heart_rate > 120:
+            alerts.append({
+                "type": "HIGH_HEART_RATE",
+                "visit_id": visit_id,
+                "message": f"Heart rate {heart_rate} exceeds threshold.",
+            })
+
+        temperature = visit.get("temperature_f")
+        if temperature is not None and temperature >= 100.4:
+            alerts.append({
+                "type": "FEVER",
+                "visit_id": visit_id,
+                "message": f"Temperature {temperature} indicates fever.",
+            })
+
+        systolic = visit.get("systolic_bp")
+        if systolic is not None and systolic >= 140:
+            alerts.append({
+                "type": "HIGH_BLOOD_PRESSURE",
+                "visit_id": visit_id,
+                "message": f"Systolic blood pressure {systolic} is elevated.",
+            })
+
     return alerts

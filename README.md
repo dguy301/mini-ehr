@@ -570,3 +570,15 @@ Visits can now include optional vital signs:
 These values are converted into simplified FHIR-like Observation resources.
 
 This makes the project more realistic because FHIR Observations are commonly used for vitals and clinical measurements.
+
+## Vital Sign Alerting
+
+The project now includes simple clinical alerting rules for abnormal vital signs.
+
+Current rules:
+
+- high heart rate
+- fever
+- elevated systolic blood pressure
+
+This demonstrates a simplified clinical decision-support style workflow.

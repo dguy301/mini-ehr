@@ -1,4 +1,4 @@
-from mini_ehr.alerts import generate_alerts
+from mini_ehr.alerts import generate_alerts, generate_vital_sign_alerts
 
 def test_patient_with_no_visits_gets_alert():
     patient = {
@@ -65,3 +65,57 @@ def test_frequent_er_visits_gets_alert():
     alerts = generate_alerts(patient)
 
     assert any(alert["type"] == "FREQUENT_ER_VISITS" for alert in alerts)
+
+def test_high_heart_rate_alert():
+    patient = {
+        "patient_id": "P001",
+        "visits": [
+            {
+                "visit_id": "V001",
+                "heart_rate": 130,
+            }
+        ],
+    }
+
+    alerts = generate_vital_sign_alerts(patient)
+
+    assert any(
+        alert["type"] == "HIGH_HEART_RATE"
+        for alert in alerts
+    )
+
+def test_fever_alert():
+    patient = {
+        "patient_id": "P001",
+        "visits": [
+            {
+                "visit_id": "V001",
+                "temperature_f": 101.2, 
+            }
+        ]
+    }
+
+    alerts = generate_vital_sign_alerts(patient)
+
+    assert any(
+        alert["type"] == "FEVER"
+        for alert in alerts
+    )
+
+def test_high_blood_pressure_alert():
+    patient = {
+        "patient_id": "P001",
+        "visits": [
+            {
+                "visit_id": "V001",
+                "systolic_bp": 160,
+            },
+        ]
+    }
+
+    alerts = generate_vital_sign_alerts(patient)
+
+    assert any(
+        alert["type"] == "HIGH_BLOOD_PRESSURE"
+        for alert in alerts
+    )
