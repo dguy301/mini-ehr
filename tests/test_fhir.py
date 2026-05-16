@@ -19,6 +19,7 @@ def test_build_patient_fhir_bundle():
                 temperature_f=98.6,
                 systolic_bp=130,
                 diastolic_bp=84,
+                medications=["Lisinopril"],
             )
         ],
     )
@@ -37,3 +38,4 @@ def test_build_patient_fhir_bundle():
     assert "Observation" in resource_types
     assert "Condition" in resource_types
     assert "Procedure" in resource_types
+    assert "MedicationStatement" in resource_types

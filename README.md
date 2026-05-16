@@ -582,3 +582,16 @@ Current rules:
 - elevated systolic blood pressure
 
 This demonstrates a simplified clinical decision-support style workflow.
+
+## FHIR-Like MedicationStatement Resource
+
+Visits can now include medications.
+
+Medications are converted into simplified FHIR-like `MedicationStatement` resources.
+
+Each medication statement references:
+
+- the patient
+- the related encounter
+
+Medication statements are also included in the FHIR-like patient bundle.

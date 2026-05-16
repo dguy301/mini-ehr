@@ -38,6 +38,13 @@ def build_patient_fhir_bundle(patient: Patient) -> dict:
         ) is not None
     ])
 
+    for visit in patient.visits:
+        resources.extend(
+            visit.to_fhir_like_medication_statements(
+                patient_id=patient.patient_id
+            )
+        )
+
     return {
         "resourceType": "Bundle",
         "type": "collection",
