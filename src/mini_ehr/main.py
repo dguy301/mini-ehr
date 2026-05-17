@@ -13,6 +13,7 @@ from mini_ehr.models import Patient, Visit
 from mini_ehr.repository import PatientRepository
 from mini_ehr.config import get_patient_data_path
 from mini_ehr.fhir import build_patient_fhir_bundle
+from mini_ehr.medications import build_medication_summary
 
 app = FastAPI(title="Mini EHR Workflow System")
 
@@ -119,6 +120,21 @@ def get_patient_alerts(patient_id: str):
         raise HTTPException(status_code=404, detail="Patient not found")
     
     return generate_alerts(patient)
+
+@app.get("/patients/{patient_id}/medications/summary")
+def get_patient_medication_summary(patient_id: str):
+    patient = repo.get_patient(patient_id)
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    record_audit_event(
+        action="VIEW_MEDICATION_SUMMARY",
+        resource_type="patient",
+        resource_id=patient_id,
+    )
+
+    return build_medication_summary(patient)
 
 @app.get("/patients/{patient_id}/fhir")
 def get_patient_fhir(patient_id: str):

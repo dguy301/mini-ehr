@@ -526,3 +526,35 @@ def test_get_patient_fhir_medications_endpoint():
     assert resources[0]["medicationCodeableConcept"]["text"] == "Lisinopril"
     assert resources[1]["medicationCodeableConcept"]["text"] == "Metformin"
     assert resources[0]["subject"]["reference"] == "Patient/P001"
+
+def test_get_patient_medication_summary_endpoint():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
+    client.post("/patients", json=patient)
+
+    visit = {
+        "visit_id": "V001",
+        "date": "2026-05-04",
+        "type": "Primary Care",
+        "diagnosis": "Hypertension",
+        "treatment": "Medication review",
+        "provider": "Dr. Smith",
+        "medications": ["Lisinopril", "Metformin", "lisinopril"],
+    }
+    client.post("/patients/P001/visits", json=visit)
+
+    response = client.get("/patients/P001/medications/summary")
+
+    assert response.status_code == 200
+
+    summary = response.json()
+    assert summary["patient_id"] == "P001"
+    assert summary["total_medications"] == 3
+    assert summary["unique_medications"] == 2
+    assert summary["medication_counts"]["lisinopril"] == 2
+    assert summary["medication_counts"]["metformin"] == 1

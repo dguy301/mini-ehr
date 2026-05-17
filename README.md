@@ -626,3 +626,11 @@ Current medication summary includes:
 - counts by medication name
 
 Medication names are normalized to lowercase for counting.
+
+## Medication Summary API
+
+The API exposes patient medication summary data through:
+
+```text
+```
+GET /patients/{patient_id}/medications/summary
