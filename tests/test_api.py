@@ -558,3 +558,21 @@ def test_get_patient_medication_summary_endpoint():
     assert summary["unique_medications"] == 2
     assert summary["medication_counts"]["lisinopril"] == 2
     assert summary["medication_counts"]["metformin"] == 1
+
+def test_analyst_cannot_create_patient():
+    patient = {
+        "patient_id": "P001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1970-05-12",
+        "visits": [],
+    }
+
+    response = client.post(
+        "/patients",
+        json=patient,
+        headers={"X-Role": "analyst"},
+    )
+
+    assert response.status_code == 403
+    assert "not allowed" in response.json()["detail"]

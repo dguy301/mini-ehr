@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header
 
+from mini_ehr.access_control import has_permission
 from mini_ehr.audit import (
     build_audit_summary, 
     create_audit_event, 
@@ -56,6 +57,14 @@ def record_audit_event(
     audit_repo.add_event(audit_event)
     return audit_event
 
+def require_permission(role: str, action: str) -> None:
+    """
+    Raise 403 if the role is not allowed to perform the action.
+    """
+    if not has_permission(role, action):
+        raise HTTPException(status_code=403, detail=f"Role '{role}' is not allowed to perform {action}")
+    
+
 @app.get("/")
 def root():
     return {"message": "Mini EHR Workflow System"}
@@ -81,7 +90,13 @@ def get_patient(patient_id: str, x_actor: str = Header(default="api_user")):
     return patient
 
 @app.post("/patients")
-def add_patient(patient: Patient, x_actor: str = Header(default="api_user")):
+def add_patient(
+    patient: Patient, 
+    x_actor: str = Header(default="api_user"),
+    x_role: str = Header(default="admin")
+):
+    require_permission(x_role, "CREATE_PATIENT")
+    
     try:
         saved_patient = repo.add_patient(patient)
 

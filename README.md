@@ -643,3 +643,34 @@ The dashboard summary now includes medication-related metrics:
 - patients with medications
 
 This expands the dashboard from visit analytics into medication tracking.
+
+## Role-Based Access Control
+
+The project now includes a simple role-based access control module.
+
+Current roles:
+
+- admin
+- clinician
+- analyst
+- auditor
+
+Permissions are checked using action names such as:
+
+- CREATE_PATIENT
+- VIEW_PATIENT
+- ADD_VISIT
+- VIEW_AUDIT_EVENTS
+- VIEW_AUDIT_SUMMARY
+
+This introduces healthcare-style access control concepts without adding full authentication yet.
+
+## API Role Checks
+
+The API now supports basic role checks using the `X-Role` request header.
+
+Example:
+
+```text
+```
+X-Role: admin
