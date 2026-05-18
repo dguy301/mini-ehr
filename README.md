@@ -634,3 +634,12 @@ The API exposes patient medication summary data through:
 ```text
 ```
 GET /patients/{patient_id}/medications/summary
+
+## Medication Dashboard Metrics
+
+The dashboard summary now includes medication-related metrics:
+
+- total medication entries
+- patients with medications
+
+This expands the dashboard from visit analytics into medication tracking.
